@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trắc Nghiệm Kinh Tế Vi Mô (Phần Nâng Cao & Bài Tập)</title>
+    <style>
+        /* --- Cấu trúc cơ bản --- */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; color: #333; line-height: 1.6; margin: 0; padding: 20px; padding-bottom: 80px; }
+        .container { max-width: 900px; margin: 0 auto; background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h1 { text-align: center; color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 30px; }
+        
+        /* --- Thanh trạng thái --- */
+        .stats-bar { position: sticky; top: 0; background: #fff; padding: 15px; border-bottom: 1px solid #eee; z-index: 100; display: flex; justify-content: space-between; align-items: center; font-weight: bold; color: #555; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        
+        /* --- Khối câu hỏi --- */
+        .question-block { margin-bottom: 25px; padding: 20px; border: 1px solid #e1e4e8; border-radius: 8px; background: #fafbfc; transition: transform 0.2s; }
+        .question-block:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
+        .question-title { font-weight: 600; font-size: 1.1em; margin-bottom: 15px; color: #2980b9; }
+        .chapter-tag { display: inline-block; background: #e0e7ff; color: #4338ca; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; margin-bottom: 5px; font-weight: bold; }
+
+        /* --- Các lựa chọn --- */
+        .options { list-style-type: none; padding: 0; }
+        .options li { margin: 10px 0; }
+        .options label { display: flex; align-items: center; padding: 12px 15px; background: #fff; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
+        .options label:hover { background-color: #f1f8ff; border-color: #3498db; }
+        .options input[type="radio"] { margin-right: 12px; transform: scale(1.2); }
+        
+        /* --- Kết quả đúng/sai --- */
+        .correct { background-color: #d1fae5 !important; border-color: #10b981 !important; color: #065f46; font-weight: 500; }
+        .incorrect { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #991b1b; }
+        .explanation { margin-top: 15px; padding: 15px; background-color: #eff6ff; border-left: 4px solid #3b82f6; border-radius: 4px; font-size: 0.95em; color: #1e3a8a; display: none; }
+        
+        /* --- NÚT BẤM TRÔI NỔI (FLOATING BUTTON) --- */
+        .btn-submit-fixed { 
+            position: fixed; 
+            bottom: 30px; 
+            right: 30px; 
+            padding: 15px 30px; 
+            background-color: #2563eb; 
+            color: white; 
+            border: none; 
+            border-radius: 50px; 
+            font-size: 1.1em; 
+            font-weight: bold; 
+            cursor: pointer; 
+            z-index: 1000; 
+            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4); 
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn-submit-fixed:hover { 
+            background-color: #1d4ed8; 
+            transform: translateY(-3px); 
+            box-shadow: 0 6px 25px rgba(37, 99, 235, 0.6);
+        }
+        
+        .btn-reset { 
+            display: block; 
+            width: 100%; 
+            padding: 15px; 
+            background-color: #6b7280; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 1.1em; 
+            font-weight: 600; 
+            cursor: pointer; 
+            margin-top: 30px; 
+        }
+        .btn-reset:hover { background-color: #4b5563; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="stats-bar">
+        <span id="progressText">Tiến độ: 0/0</span>
+        <span id="scoreText">Điểm: 0</span>
+    </div>
+
+    <h1>Trắc Nghiệm Kinh Tế Vi Mô (Sản Xuất, Thị Trường & Yếu Tố SX)</h1>
+    
+    <div id="quiz-container">
+        </div>
+
+    <button class="btn-reset" onclick="resetQuiz()">Làm Lại Từ Đầu</button>
+</div>
+
+<button class="btn-submit-fixed" onclick="submitQuiz()">
+    <span>📝</span> Nộp Bài & Xem Kết Quả
+</button>
+
+<script>
+    // Dữ liệu câu hỏi (Đã lược bỏ phần 1, bắt đầu từ phần Sản xuất & Chi phí)
+    const quizData = [
+        // --- PHẦN 2: SẢN XUẤT & CHI PHÍ (Cũ: 39-50) ---
+        { id: 39, text: "Chi phí biến đổi bình quân (AVC) cực tiểu khi:", answers: ["Sản phẩm trung bình (AP) cực đại", "TP cực đại", "MP cực đại", "MP bằng 0"], correct: 0 },
+        { id: 40, text: "Tổng chi phí biến đổi (TVC):", answers: ["Tăng dần khi sản lượng tăng", "Giảm dần khi sản lượng tăng", "Tăng khi sản lượng giảm", "Không đổi"], correct: 0 },
+        { id: 41, text: "Ngắn hạn là khoảng thời gian:", answers: ["Có ít nhất 1 đầu vào cố định", "Tất cả đầu vào thay đổi", "< 1 năm", "Tất cả đầu vào cố định"], correct: 0 },
+        { id: 42, text: "Khi MP < AP thì:", answers: ["Năng suất biên giảm dần", "AP tăng", "TP dốc âm", "Sản phẩm trung bình (AP) giảm xuống"], correct: 3 },
+        { id: 43, text: "Dài hạn là khoảng thời gian:", answers: ["Tất cả đầu vào có thể thay đổi", "Có đầu vào cố định", "> 1 năm", "Không đủ thời gian thay đổi thiết bị"], correct: 0 },
+        { id: 44, text: "Sản phẩm biên của lao động (MPL) bằng:", answers: ["ΔTC/ΔL", "Q/L", "ΔQ/ΔL", "ΔL/ΔQ"], correct: 2 },
+        { id: 45, text: "Phát biểu nào KHÔNG chính xác?", answers: ["ATC giảm khi MC < ATC", "ATC tăng khi MC > ATC", "MC = ATC thì ATC cực tiểu", "MC tăng lên thì ATC cũng tăng lên (Sai, MC có thể tăng nhưng vẫn < ATC thì ATC vẫn giảm)"], correct: 3 },
+        { id: 46, text: "Tổng chi phí cố định (TFC):", answers: ["Giảm dần khi Q tăng", "Tăng dần khi Q tăng", "Không đổi khi sản lượng thay đổi", "Tăng khi Q giảm"], correct: 2 },
+        { id: 47, text: "Đường tổng sản phẩm (TP) thể hiện:", answers: ["Chi phí tối thiểu", "Sản lượng đạt được với đầu vào xác định", "Lợi nhuận tối đa", "Sản lượng tối đa với lượng đầu vào biến đổi xác định"], correct: 3 },
+        { id: 48, text: "Đường MC cắt:", answers: ["AVC, AFC tại đáy", "ATC, AVC, AFC tại đáy", "ATC và AVC tại điểm cực tiểu của chúng", "ATC, AFC tại đáy"], correct: 2 },
+        { id: 49, text: "Sản phẩm trung bình (APL) bằng:", answers: ["Q/L", "ΔQ/ΔL", "ΔTC/ΔL", "L/Q"], correct: 0 },
+        { id: 50, text: "Nếu MC > AVC thì khi sản lượng tăng:", answers: ["AVC tăng lên", "AFC tăng", "AVC giảm", "ATC không đổi"], correct: 0 },
+
+        // --- PHẦN 3: CẤU TRÚC THỊ TRƯỜNG (Cũ: 51-68) ---
+        { id: 51, text: "Khác biệt giữa Cạnh tranh độc quyền (CTĐQ) và Độc quyền nhóm (ĐQN):", answers: ["ĐQN có ít doanh nghiệp hơn CTĐQ", "CTĐQ có ít DN hơn ĐQN", "Sản phẩm ĐQN khác biệt nhiều hơn", "Rào cản CTĐQ cao hơn"], correct: 0 },
+        { id: 52, text: "Doanh thu biên (MR) của độc quyền bán:", answers: ["Lợi nhuận vượt mức", "Bằng giá bán", "Giá đặt cho sản phẩm", "Mức thay đổi tổng doanh thu khi bán thêm 1 đơn vị"], correct: 3 },
+        { id: 53, text: "Doanh nghiệp độc quyền tối đa hóa lợi nhuận tại:", answers: ["MR > 0", "TR max", "TC min", "MR = MC"], correct: 3 },
+        { id: 54, text: "Đặc điểm độc quyền bán:", answers: ["Duy nhất 1 DN bán", "Duy nhất 1 người mua", "Rào cản thấp", "Nhiều sản phẩm thay thế"], correct: 0 },
+        { id: 55, text: "Phân biệt giá đòi hỏi:", answers: ["Giảm TFC", "Giảm AVC", "Phân đoạn thị trường theo mức sẵn lòng trả", "MC khác nhau"], correct: 2 },
+        { id: 56, text: "Tại điểm gãy của đường cầu (mô hình ĐQN):", answers: ["Đường MR bị gián đoạn", "Đường AR gián đoạn", "Đường ATC gián đoạn", "Đường MC gián đoạn"], correct: 0 },
+        { id: 57, text: "DN tối đa hóa DOANH THU (TR max) khi:", answers: ["MR = MC", "MR = 0", "MR > MC", "MR > 0"], correct: 1 },
+        { id: 58, text: "Độc quyền nhóm KHÔNG có đặc điểm:", answers: ["Tối đa hóa lợi nhuận", "Lượng bán của một DN KHÔNG ảnh hưởng DN khác (Sai, vì phụ thuộc lẫn nhau)", "Đường cầu gãy", "Có nhiều hơn 1 hãng"], correct: 1 },
+        { id: 59, text: "Độc quyền nhóm có đặc điểm:", answers: ["Phải xem xét hành vi đối thủ", "Không cần tính đến đối thủ", "Phụ thuộc lẫn nhau do số ít DN", "Cả A và C đều đúng"], correct: 3 },
+        { id: 60, text: "Ví dụ về độc quyền nhóm:", answers: ["Gạo (CTHH)", "Kinh doanh xăng dầu/Viễn thông", "May mặc (CTĐQ)", "Nước giải khát (Thường là ĐQN)"], correct: 1 },
+        { id: 61, text: "Độc quyền có lợi nhuận dương dài hạn vì:", answers: ["Trợ cấp", "Tự định giá", "Quản lý tốt", "Rào cản gia nhập ngăn cản đối thủ"], correct: 3 },
+        { id: 62, text: "Rào cản tự nhiên của độc quyền:", answers: ["Tính kinh tế theo quy mô (Độc quyền tự nhiên)", "Bằng sáng chế", "Bản quyền", "Giấy phép"], correct: 0 },
+        { id: 63, text: "DN Cạnh tranh độc quyền có lợi nhuận dương:", answers: ["Trong dài hạn", "Khi có rào cản", "Trong ngắn hạn (Dài hạn sẽ về 0)", "Khi đối thủ lỗ"], correct: 2 },
+        { id: 64, text: "Đường cung của độc quyền bán:", answers: ["Đường MC", "Đường AR", "Không có đường cung rõ ràng", "Phần MC trên AVC"], correct: 2 },
+        { id: 65, text: "Khác nhau giữa CTHH và CTĐQ:", answers: ["DN CTĐQ có sức mạnh thị trường (quyền định giá)", "CTĐQ có rào cản lớn", "CTHH sản phẩm khác biệt", "CTHH ít doanh nghiệp"], correct: 0 },
+        { id: 66, text: "Sức mạnh độc quyền (Lerner Index) đo bằng:", answers: ["P - AVC", "P - ATC", "(P - MC)/P", "P - MC"], correct: 2 },
+        { id: 67, text: "Trong dài hạn, DN Cạnh tranh độc quyền:", answers: ["Cầu hoàn toàn co giãn", "Sản xuất tại ATCmin", "Có lợi nhuận kinh tế", "Sản xuất ít hơn mức ATCmin (Dư thừa công suất)"], correct: 3 },
+
+        // --- PHẦN 4: THỊ TRƯỜNG YẾU TỐ SX (Cũ: 69-86) ---
+        { id: 69, text: "Lượng sản phẩm tăng thêm do thuê thêm 1 lao động:", answers: ["VMP", "MRP", "APL", "Sản phẩm biên (MPL)"], correct: 3 },
+        { id: 70, text: "Trên thị trường yếu tố SX:", answers: ["Hộ gia đình CUNG, Doanh nghiệp CẦU", "Hộ gia đình CẦU", "Doanh nghiệp CUNG", "DN không tham gia"], correct: 0 },
+        { id: 71, text: "Sản phẩm doanh thu biên của lao động (MRPL):", answers: ["ΔQ/ΔL", "P.MPK", "ΔTR/ΔQ", "MR x MPL (hoặc ΔTR/ΔL)"], correct: 3 },
+        { id: 72, text: "Nếu MRPL < W (Tiền lương), DN cạnh tranh hoàn hảo sẽ:", answers: ["Giảm lương", "Thuê thêm L", "Giảm bớt L", "Tăng lương"], correct: 2 },
+        { id: 73, text: "Điều kiện tối ưu vốn (K):", answers: ["P = MC", "MRPk = MFCk (Chi phí biên của vốn)", "Thuê vốn = MPL", "MC = MP"], correct: 1 },
+        { id: 74, text: "Giá trị sản phẩm biên (VMPL) trong CTHH bằng:", answers: ["P x MPL", "MR x MPL", "MPL", "P/MPL"], correct: 0 },
+        { id: 75, text: "Cung lao động cá nhân phụ thuộc:", answers: ["Tâm lý", "Kinh tế (Tiền lương)", "Sự đánh đổi nghỉ ngơi/làm việc", "Tất cả"], correct: 3 },
+        { id: 77, text: "Cầu yếu tố sản xuất là:", answers: ["Cầu tự định", "Cầu dẫn xuất (thứ phát) từ cầu hàng hóa", "Cầu độc lập", "Cầu liên quan"], correct: 1 },
+        { id: 78, text: "Sản phẩm doanh thu biên của vốn (MRPk):", answers: ["ΔQ/ΔK", "ΔTR/ΔK", "ΔTR/ΔQ", "P.MPL"], correct: 1 },
+        { id: 82, text: "MRPL của độc quyền bán bằng:", answers: ["MPL", "P x MPL", "MR x MPL", "VMPL"], correct: 2 },
+        { id: 84, text: "Đường cầu lao động dịch phải khi:", answers: ["Giá sản phẩm đầu ra (P) tăng", "Giá P giảm", "Giá lao động giảm", "Giá lao động tăng"], correct: 0 },
+        { id: 85, text: "Đường cung đất đai:", answers: ["Nằm ngang", "Dốc lên", "Cong về sau", "Thẳng đứng (Hoàn toàn không co giãn)"], correct: 3 },
+
+        // --- PHẦN 5: CÂU HỎI MỚI CHUYÊN SÂU (Từ PDF, Cũ: 87-102) ---
+        { id: 87, text: "Khi Chính phủ đánh thuế t/đơn vị lên người bán, nếu Cầu hoàn toàn không co giãn (thẳng đứng), thì:", answers: ["Người bán chịu 100% thuế", "Người mua chịu 100% thuế", "Chia đều thuế", "Người bán chịu nhiều hơn"], correct: 1, explanation: "Khi cầu hoàn toàn không co giãn, người mua buộc phải mua bất kể giá nào, nên gánh toàn bộ thuế." },
+        { id: 88, text: "'Sàn giá' (Price Floor) có hiệu lực khi nào và gây ra hiện tượng gì?", answers: ["Đặt dưới giá cân bằng, gây thiếu hụt", "Đặt trên giá cân bằng, gây dư thừa", "Đặt trên giá cân bằng, gây thiếu hụt", "Đặt dưới giá cân bằng, gây dư thừa"], correct: 1, explanation: "Sàn giá (như lương tối thiểu) phải đặt TRÊN mức cân bằng mới có hiệu lực, dẫn đến cung > cầu (dư thừa/thất nghiệp)." },
+        { id: 89, text: "Tỷ lệ thay thế biên (MRSxy) đo lường:", answers: ["Độ dốc đường ngân sách", "Độ dốc đường bàng quan (Số lượng Y sẵn sàng hy sinh để lấy thêm 1 X)", "Tỷ lệ giá cả Px/Py", "Tổng lợi ích"], correct: 1, explanation: "MRS là độ dốc của đường bàng quan, thể hiện tỷ lệ đánh đổi chủ quan của người tiêu dùng." },
+        { id: 90, text: "Điều kiện cân bằng của người tiêu dùng (tối đa hóa lợi ích):", answers: ["MUx = MUy", "Px = Py", "MUx/Px = MUy/Py", "MRSxy = Py/Px"], correct: 2, explanation: "Lợi ích biên trên mỗi đồng chi tiêu phải bằng nhau giữa các hàng hóa (Nguyên tắc san bằng lợi ích biên)." },
+        { id: 91, text: "Nếu thu nhập tăng 10% làm lượng cầu giảm 5%, đây là:", answers: ["Hàng xa xỉ", "Hàng thiết yếu", "Hàng cấp thấp (Thứ cấp)", "Hàng độc lập"], correct: 2, explanation: "Co giãn thu nhập (Ei) âm thể hiện mối quan hệ ngược chiều: Thu nhập tăng -> Cầu giảm => Hàng cấp thấp." },
+        { id: 92, text: "Đường đồng lượng (Isoquant) thể hiện:", answers: ["Các kết hợp K và L tốn cùng chi phí", "Các kết hợp K và L tạo ra cùng sản lượng", "Lợi nhuận tối đa", "Năng suất biên bằng nhau"], correct: 1, explanation: "Isoquant (Đường đẳng lượng) là tập hợp các điểm phối hợp đầu vào cho cùng một mức đầu ra." },
+        { id: 93, text: "Tỷ lệ thay thế kỹ thuật biên (MRTS) là:", answers: ["Độ dốc đường đẳng phí", "Độ dốc đường đẳng lượng", "Tỷ lệ giá w/r", "Tỷ số năng suất trung bình"], correct: 1, explanation: "MRTS là độ dốc đường đẳng lượng, cho biết khả năng thay thế kỹ thuật giữa vốn và lao động." },
+        { id: 94, text: "Điểm phối hợp đầu vào tối ưu (chi phí thấp nhất cho 1 mức Q) là tiếp điểm của:", answers: ["Đường cầu và đường cung", "Đường đẳng lượng và đường đẳng phí", "Đường MC và ATC", "Đường MR và MC"], correct: 1, explanation: "Tại tiếp điểm, độ dốc 2 đường bằng nhau: MPL/MPK = w/r." },
+        { id: 95, text: "Trong Cạnh tranh hoàn hảo, 'Hiệu quả phân bổ' đạt được khi:", answers: ["P = ATC min", "P = MC", "MR = MC", "P > AVC"], correct: 1, explanation: "P=MC nghĩa là giá trị xã hội đặt cho hàng hóa bằng đúng chi phí biên để sản xuất nó (Hiệu quả phân bổ)." },
+        { id: 96, text: "Điểm đóng cửa (Shutdown point) của doanh nghiệp CTHH trong ngắn hạn:", answers: ["P < ATC", "P < AVC min", "P < MC", "TR < TC"], correct: 1, explanation: "Nếu giá không bù đắp được chi phí biến đổi trung bình (AVC), doanh nghiệp nên đóng cửa ngay lập tức." },
+        { id: 97, text: "Đường cầu của doanh nghiệp Cạnh tranh hoàn hảo có dạng:", answers: ["Dốc xuống", "Nằm ngang (Co giãn hoàn toàn)", "Thẳng đứng", "Gãy khúc"], correct: 1, explanation: "Do là người chấp nhận giá (Price taker), DN bán mọi số lượng tại mức giá thị trường." },
+        { id: 98, text: "Tổn thất vô ích (Deadweight Loss) trong độc quyền sinh ra do:", answers: ["Lợi nhuận độc quyền cao", "Sản xuất tại Q < Q hiệu quả và P > MC", "Chi phí quảng cáo", "Thuế"], correct: 1, explanation: "Độc quyền hạn chế sản lượng và nâng giá, gây mất mát phúc lợi xã hội ròng." },
+        { id: 99, text: "'Tiền thuê kinh tế' (Economic Rent) là:", answers: ["Tiền thuê đất", "Phần thu nhập vượt quá chi phí cơ hội của yếu tố đầu vào", "Lợi nhuận kế toán", "Tiền lãi suất"], correct: 1, explanation: "Là phần thặng dư trả cho một yếu tố sản xuất vượt quá mức tối thiểu cần thiết để giữ nó lại làm việc (liên quan đến cung không co giãn)." },
+        { id: 100, text: "Đường cung lao động VÒNG VỀ PHÍA SAU (Backward bending) xuất hiện khi:", answers: ["Hiệu ứng thay thế mạnh hơn hiệu ứng thu nhập", "Hiệu ứng thu nhập mạnh hơn hiệu ứng thay thế (khi lương quá cao)", "Lương thấp", "Cung hoàn toàn co giãn"], correct: 1, explanation: "Khi lương rất cao, người ta giàu có hơn và muốn hưởng thụ (nghỉ ngơi nhiều hơn), làm lượng cung lao động giảm." },
+        { id: 101, text: "Lãi suất (Interest rate) được xác định bởi:", answers: ["Cung cầu đất đai", "Cung cầu vốn vay (Loanable funds)", "Chính phủ áp đặt", "Thị trường lao động"], correct: 1, explanation: "Lãi suất là giá của vốn, xác định trên thị trường vốn." },
+        { id: 102, text: "Khi Chính phủ định mức tiền lương tối thiểu cao hơn mức cân bằng thị trường lao động:", answers: ["Gây thiếu hụt lao động", "Gây thất nghiệp", "Tăng việc làm", "Không ảnh hưởng"], correct: 1, explanation: "Đây là sàn giá, gây ra lượng cung L > lượng cầu L => Thất nghiệp." }
+    ];
+
+    const quizContainer = document.getElementById('quiz-container');
+    const progressText = document.getElementById('progressText');
+    const scoreText = document.getElementById('scoreText');
+    
+    // Hàm render câu hỏi
+    function renderQuiz() {
+        quizContainer.innerHTML = '';
+        quizData.forEach((q, index) => {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question-block';
+            
+            // Xác định chương (tag)
+            let chapterName = "Chuyên đề";
+            // Logic gắn thẻ tag dựa trên ID cũ
+            if (q.id <= 50) chapterName = "Chương 4: Sản xuất & Chi phí";
+            else if (q.id <= 68) chapterName = "Chương 5: Cấu trúc Thị trường";
+            else if (q.id <= 86) chapterName = "Chương 6: Yếu tố Sản xuất";
+            else chapterName = "Câu hỏi Nâng cao & PDF";
+
+            questionDiv.innerHTML = `
+                <span class="chapter-tag">${chapterName}</span>
+                <div class="question-title">Câu ${index + 1}: ${q.text}</div>
+                <ul class="options">
+                    ${q.answers.map((ans, i) => `
+                        <li>
+                            <label id="label-${index}-${i}">
+                                <input type="radio" name="question-${index}" value="${i}" onclick="updateProgress()">
+                                ${ans}
+                            </label>
+                        </li>
+                    `).join('')}
+                </ul>
+                <div class="explanation" id="exp-${index}">
+                    <strong>Đáp án đúng:</strong> ${q.answers[q.correct]}
+                    ${q.explanation ? `<br><em>Giải thích: ${q.explanation}</em>` : ''}
+                </div>
+            `;
+            quizContainer.appendChild(questionDiv);
+        });
+        updateProgress();
+    }
+
+    // Cập nhật thanh trạng thái
+    function updateProgress() {
+        const answered = document.querySelectorAll('input[type="radio"]:checked').length;
+        progressText.innerText = `Tiến độ: ${answered}/${quizData.length}`;
+    }
+
+    // Hàm reset
+    function resetQuiz() {
+        if(confirm("Bạn có chắc muốn làm lại từ đầu không?")) {
+            location.reload();
+        }
+    }
+
+    // Hàm nộp bài
+    function submitQuiz() {
+        let score = 0;
+        let answeredCount = 0;
+        
+        quizData.forEach((q, index) => {
+            const radios = document.getElementsByName(`question-${index}`);
+            let selected = -1;
+            
+            // Reset style cũ
+            for(let r of radios) {
+                r.parentElement.classList.remove('correct', 'incorrect');
+                if(r.checked) selected = parseInt(r.value);
+            }
+            
+            const expDiv = document.getElementById(`exp-${index}`);
+            
+            if(selected !== -1) {
+                answeredCount++;
+                if(selected === q.correct) {
+                    score++;
+                    radios[selected].parentElement.classList.add('correct');
+                } else {
+                    radios[selected].parentElement.classList.add('incorrect');
+                    document.getElementById(`label-${index}-${q.correct}`).classList.add('correct');
+                }
+            } else {
+                // Nếu chưa chọn thì chỉ hiện đáp án đúng
+                document.getElementById(`label-${index}-${q.correct}`).classList.add('correct');
+            }
+            
+            expDiv.style.display = 'block';
+        });
+
+        scoreText.innerText = `Điểm: ${score}/${quizData.length}`;
+        alert(`Bạn đã hoàn thành bài thi!\nĐiểm số: ${score}/${quizData.length}\nCác câu chưa làm sẽ được tính là sai.`);
+    }
+
+    // Khởi chạy khi tải trang
+    renderQuiz();
+</script>
+
+</body>
+</html>
